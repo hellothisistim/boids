@@ -115,9 +115,9 @@ class Boid:
         self.goal = None
 
     def __repr__(self):
-        return "Boid(%s, %s, %f, %f, %f, %f)" % (self.position, self.velocity,
+        return "Boid(%s, %s, %f, %f, %f, %f, %s)" % (self.position, self.velocity,
             self.clumping_mag, self.min_distance, self.schooling_mag,
-            self.velocity_max)
+            self.velocity_max, self.boundary)
 
     def set_position(self, px, py, pz):
         self.position = Vec3D(px, py, pz)
@@ -130,14 +130,22 @@ class Boid:
 
     def unset_boundary(self):
         self.boundary = None
+    
+    def add_obstacle(self, obstacle):
+        self.obstacles.append(obstacle)
 
     def update_velocity(self, boids):
         v1 = self.rule1(boids)
         v2 = self.rule2(boids)
         v3 = self.rule3(boids)
         bound = self.stay_in_boundary()
-        # TODO: Do obstacle avoidance here.
-        self.velocity += v1 + v2 + v3 + bound
+        obstacle = self.avoid_obstacles()
+        print "v1", v1
+        print "v2", v2
+        print "v3", v3
+        print "bound", bound
+        print "obstacle", obstacle
+        self.velocity += v1 + v2 + v3 + bound + obstacle
         self.limit_speed()
 
     def move(self):
@@ -185,17 +193,21 @@ class Boid:
         if self.velocity.mag() > self.velocity_max:
             self.velocity /= self.velocity.mag() / self.velocity_max
 
-    def stay_in_boundary():
+    def stay_in_boundary(self):
         """Returns the vector to push the boid back insde the boundary if it's
         outside. Otherwise, returns Vec3D(0, 0, 0).
         """
         bound = Vec3D(0, 0, 0)
         if self.boundary is not None:
-            bound = self.boundary.correction()
+            bound = self.boundary.correction(self)
+        return bound
 
-    def avoid_obstacles():
-        """TODO: Implement this."""
-        assert False  # TODO: Implement this.
+    def avoid_obstacles(self):
+        """Compile the correctoin from all the obstacles."""
+        compiled = Vec3D(0, 0, 0)
+        for obstacle in self.obstacles:
+            compiled += obstacle.correction
+        return compiled
 
     def tend_to_place(self):
         """TODO: Tendency towards a particular place
@@ -230,24 +242,25 @@ class Boundary:
         self.max = Vec3D(max_x, max_y, max_z)
         self.strength = strength
 
-    def correction(boid):
+    def __repr__(self):
+        return "Boundary(%s, %s, %f)" % (self.min, self.max, self.strength)
+                
+    def correction(self, boid):
         """Return a Vec3D that will push the boid back inside the boundary."""
 
         v = Vec3D(0, 0, 0)
-        if not self.boundary:
-            return v
-        if self.position.x < self.boundary.min.x:
-            v.x = self.boundary.strength
-        elif self.position.x > self.boundary.max.x:
-            v.x = -self.boundary.strength
-        if self.position.y < self.boundary.min.y:
-            v.y = self.boundary.strength
-        elif self.position.y > self.boundary.max.y:
-            v.y = -self.boundary.strength
-        if self.position.z < self.boundary.min.z:
-            v.z = self.boundary.strength
-        elif self.position.z > self.boundary.max.z:
-            v.z = -self.boundary.strength
+        if boid.position.x < self.min.x:
+            v.x = self.strength
+        elif boid.position.x > self.max.x:
+            v.x = -self.strength
+        if boid.position.y < self.min.y:
+            v.y = self.strength
+        elif boid.position.y > self.max.y:
+            v.y = -self.strength
+        if boid.position.z < self.min.z:
+            v.z = self.strength
+        elif boid.position.z > self.max.z:
+            v.z = -self.strength
         return v
 
 
@@ -266,7 +279,7 @@ class Obstacle:
     def set_position(self, px, py, pz):
         self.position = Vec3D(px, py, pz)
 
-    def correction(boid):
+    def correction(self, boid):
         pass
 
 
