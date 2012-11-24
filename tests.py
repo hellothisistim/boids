@@ -89,8 +89,8 @@ def test_ObstacleSphere_correction_mid():
     obstacle = boids.ObstacleSphere(0, 0, 0, 15, 1, 2)
     correction = obstacle.correction(boid)
     target = boids.Vec3D(7.5, 0, 0)
-    print "correction:", correction
-    print "target:", target
+    #print "correction:", correction
+    #print "target:", target
     assert vec3d_float_eq(correction, target)
     
 
