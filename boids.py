@@ -273,9 +273,15 @@ class Obstacle:
     """
 
     def __init__(self, px=0, py=0, pz=0, strength=10):
+        for var in (px, py, pz, strength):
+            assert (type(var) is int) or (type(var) is float)
         self.position = Vec3D(0, 0, 0)
         self.strength = strength
 
+    # TODO: implement __repr__
+    #def __repr__(self):
+    #    pass
+        
     def set_position(self, px, py, pz):
         self.position = Vec3D(px, py, pz)
 
@@ -300,6 +306,10 @@ class ObstacleSphere(Obstacle):
         self.radius_max = radius_max
         self.radius_min = radius_min
 
+    def __repr__(self):
+        return "ObstacleSphere(%s, %f, %f, %f)" % (self.position, 
+                    self.strength, self.radius_max, self.radius_min)
+        
     def correction(self, boid):
         """Correction vector for this boid and this obstacle.
 
