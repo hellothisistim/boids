@@ -206,7 +206,7 @@ class Boid:
         """Compile the correctoin from all the obstacles."""
         compiled = Vec3D(0, 0, 0)
         for obstacle in self.obstacles:
-            compiled += obstacle.correction
+            compiled += obstacle.correction(self)
         return compiled
 
     def tend_to_place(self):
@@ -315,7 +315,7 @@ class ObstacleSphere(Obstacle):
 
         The vector will have a length equal to the obstacle's strength when
         the boid is inside the radius_max. The vector's length will linearly
-        move to zero as the boid approaches radisu_min. If the boid is not
+        move to zero as the boid approaches radius_min. If the boid is not
         inside radius_min, the vector's length will be zero.
 
         Returns Vec3D
